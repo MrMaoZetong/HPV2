@@ -18,8 +18,10 @@ import {
   Zap,
   Crown,
   Trophy,
-  Star
+  Star,
+  TrendingUp
 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface Badge {
   id: string;
@@ -27,6 +29,7 @@ interface Badge {
   description: string;
   icon: string;
   earned: boolean;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
 }
 
 const mockBadges: Badge[] = [
@@ -36,6 +39,7 @@ const mockBadges: Badge[] = [
     description: 'Créer votre premier segment',
     icon: 'star',
     earned: true,
+    rarity: 'common',
   },
   {
     id: '2',
@@ -43,6 +47,7 @@ const mockBadges: Badge[] = [
     description: 'Créer 10 segments',
     icon: 'crown',
     earned: true,
+    rarity: 'rare',
   },
   {
     id: '3',
@@ -50,6 +55,7 @@ const mockBadges: Badge[] = [
     description: 'Participer à 5 trames différentes',
     icon: 'trophy',
     earned: false,
+    rarity: 'epic',
   },
   {
     id: '4',
@@ -57,8 +63,16 @@ const mockBadges: Badge[] = [
     description: 'Recevoir 100 likes',
     icon: 'award',
     earned: true,
+    rarity: 'legendary',
   },
 ];
+
+const rarityColors = {
+  common: '#9CA3AF',
+  rare: '#3B82F6',
+  epic: '#8B5CF6',
+  legendary: '#F59E0B',
+};
 
 const getIconComponent = (iconName: string, size: number, color: string) => {
   switch (iconName) {
@@ -80,165 +94,228 @@ export default function ProfileScreen() {
   const nextLevelXP = 3000;
   const progressPercentage = (userXP / nextLevelXP) * 100;
 
+  const renderStatCard = (icon: any, value: string, label: string, color: string) => (
+    <View style={styles.statCard}>
+      <LinearGradient
+        colors={[color + '20', color + '10']}
+        style={styles.statCardGradient}
+      >
+        <View style={[styles.statIcon, { backgroundColor: color + '30' }]}>
+          {icon}
+        </View>
+        <Text style={styles.statNumber}>{value}</Text>
+        <Text style={styles.statLabel}>{label}</Text>
+      </LinearGradient>
+    </View>
+  );
+
+  const renderBadgeCard = (badge: Badge) => (
+    <View key={badge.id} style={[styles.badgeCard, !badge.earned && styles.lockedBadge]}>
+      <LinearGradient
+        colors={badge.earned ? [rarityColors[badge.rarity] + '30', rarityColors[badge.rarity] + '10'] : ['#374151', '#1F2937']}
+        style={styles.badgeCardGradient}
+      >
+        <View style={[
+          styles.badgeIcon, 
+          { backgroundColor: badge.earned ? rarityColors[badge.rarity] + '40' : '#4B5563' }
+        ]}>
+          {getIconComponent(
+            badge.icon, 
+            24, 
+            badge.earned ? rarityColors[badge.rarity] : '#9CA3AF'
+          )}
+        </View>
+        <Text style={[styles.badgeName, !badge.earned && styles.lockedBadgeName]}>
+          {badge.name}
+        </Text>
+        <Text style={styles.badgeDescription}>{badge.description}</Text>
+        <View style={[styles.rarityIndicator, { backgroundColor: rarityColors[badge.rarity] }]}>
+          <Text style={styles.rarityText}>{badge.rarity.toUpperCase()}</Text>
+        </View>
+      </LinearGradient>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      {/* Header with gradient */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mon Profil</Text>
-        <TouchableOpacity style={styles.settingsButton}>
-          <Settings size={24} color="#8B5CF6" strokeWidth={2} />
-        </TouchableOpacity>
+        <LinearGradient
+          colors={['#8B5CF6', '#EC4899']}
+          style={styles.headerGradient}
+        >
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Mon Profil</Text>
+            <TouchableOpacity style={styles.settingsButton}>
+              <Settings size={24} color="#FFFFFF" strokeWidth={2} />
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Profile Info */}
-        <View style={styles.profileCard}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <User size={40} color="#8B5CF6" strokeWidth={2} />
-            </View>
-            <View style={styles.levelBadge}>
-              <Text style={styles.levelText}>{userLevel}</Text>
-            </View>
-          </View>
-          
-          <View style={styles.profileInfo}>
-            <Text style={styles.username}>FantasyMaster</Text>
-            <Text style={styles.userBio}>Créateur d'histoires épiques depuis 2024</Text>
-            
-            <View style={styles.xpContainer}>
-              <View style={styles.xpBar}>
-                <View style={[styles.xpProgress, { width: `${progressPercentage}%` }]} />
+        <View style={styles.profileSection}>
+          <View style={styles.profileCard}>
+            <LinearGradient
+              colors={['#1F2937', '#111827']}
+              style={styles.profileCardGradient}
+            >
+              <View style={styles.avatarContainer}>
+                <LinearGradient
+                  colors={['#8B5CF6', '#EC4899']}
+                  style={styles.avatar}
+                >
+                  <User size={40} color="#FFFFFF" strokeWidth={2} />
+                </LinearGradient>
+                <View style={styles.levelBadge}>
+                  <Text style={styles.levelText}>{userLevel}</Text>
+                </View>
               </View>
-              <Text style={styles.xpText}>{userXP} / {nextLevelXP} XP</Text>
-            </View>
+              
+              <View style={styles.profileInfo}>
+                <Text style={styles.username}>FantasyMaster</Text>
+                <Text style={styles.userTitle}>Créateur de Mondes</Text>
+                <Text style={styles.userBio}>Créateur d'histoires épiques depuis 2024</Text>
+                
+                <View style={styles.xpContainer}>
+                  <View style={styles.xpBar}>
+                    <LinearGradient
+                      colors={['#8B5CF6', '#EC4899']}
+                      style={[styles.xpProgress, { width: `${progressPercentage}%` }]}
+                    />
+                  </View>
+                  <Text style={styles.xpText}>{userXP} / {nextLevelXP} XP</Text>
+                </View>
+              </View>
+            </LinearGradient>
           </View>
         </View>
 
         {/* Stats */}
         <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <BookOpen size={24} color="#8B5CF6" strokeWidth={2} />
-            <Text style={styles.statNumber}>23</Text>
-            <Text style={styles.statLabel}>Segments</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Users size={24} color="#06B6D4" strokeWidth={2} />
-            <Text style={styles.statNumber}>7</Text>
-            <Text style={styles.statLabel}>Trames</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Heart size={24} color="#EC4899" strokeWidth={2} />
-            <Text style={styles.statNumber}>156</Text>
-            <Text style={styles.statLabel}>Likes</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Zap size={24} color="#F59E0B" strokeWidth={2} />
-            <Text style={styles.statNumber}>89</Text>
-            <Text style={styles.statLabel}>Streak</Text>
-          </View>
+          {renderStatCard(
+            <BookOpen size={24} color="#8B5CF6" strokeWidth={2} />,
+            '23',
+            'Segments',
+            '#8B5CF6'
+          )}
+          {renderStatCard(
+            <Users size={24} color="#06B6D4" strokeWidth={2} />,
+            '7',
+            'Trames',
+            '#06B6D4'
+          )}
+          {renderStatCard(
+            <Heart size={24} color="#EC4899" strokeWidth={2} />,
+            '156',
+            'Likes',
+            '#EC4899'
+          )}
+          {renderStatCard(
+            <TrendingUp size={24} color="#F59E0B" strokeWidth={2} />,
+            '89',
+            'Streak',
+            '#F59E0B'
+          )}
         </View>
 
         {/* Badges Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Badges Débloqués</Text>
+          <Text style={styles.sectionTitle}>🏆 Collection de Badges</Text>
           <View style={styles.badgesContainer}>
-            {mockBadges.map((badge) => (
-              <View key={badge.id} style={[styles.badgeCard, !badge.earned && styles.lockedBadge]}>
-                <View style={[styles.badgeIcon, !badge.earned && styles.lockedBadgeIcon]}>
-                  {getIconComponent(
-                    badge.icon, 
-                    24, 
-                    badge.earned ? '#F59E0B' : '#9CA3AF'
-                  )}
-                </View>
-                <Text style={[styles.badgeName, !badge.earned && styles.lockedBadgeName]}>
-                  {badge.name}
-                </Text>
-                <Text style={styles.badgeDescription}>{badge.description}</Text>
-              </View>
-            ))}
+            {mockBadges.map(renderBadgeCard)}
           </View>
         </View>
 
         {/* Recent Activity */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Activité Récente</Text>
+          <Text style={styles.sectionTitle}>📈 Activité Récente</Text>
           <View style={styles.activityContainer}>
-            <View style={styles.activityItem}>
-              <View style={styles.activityIcon}>
-                <BookOpen size={16} color="#8B5CF6" strokeWidth={2} />
+            <LinearGradient
+              colors={['#1F2937', '#111827']}
+              style={styles.activityCardGradient}
+            >
+              <View style={styles.activityItem}>
+                <View style={[styles.activityIcon, { backgroundColor: '#8B5CF630' }]}>
+                  <BookOpen size={16} color="#8B5CF6" strokeWidth={2} />
+                </View>
+                <View style={styles.activityContent}>
+                  <Text style={styles.activityText}>Nouveau segment ajouté à "Les Gardiens d'Aetheria"</Text>
+                  <Text style={styles.activityTime}>Il y a 2 heures</Text>
+                </View>
               </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityText}>Nouveau segment ajouté à "Les Gardiens d'Aetheria"</Text>
-                <Text style={styles.activityTime}>Il y a 2 heures</Text>
+              
+              <View style={styles.activityItem}>
+                <View style={[styles.activityIcon, { backgroundColor: '#EC489930' }]}>
+                  <Heart size={16} color="#EC4899" strokeWidth={2} />
+                </View>
+                <View style={styles.activityContent}>
+                  <Text style={styles.activityText}>Votre segment a reçu 12 nouveaux likes</Text>
+                  <Text style={styles.activityTime}>Il y a 5 heures</Text>
+                </View>
               </View>
-            </View>
-            <View style={styles.activityItem}>
-              <View style={styles.activityIcon}>
-                <Heart size={16} color="#EC4899" strokeWidth={2} />
+              
+              <View style={styles.activityItem}>
+                <View style={[styles.activityIcon, { backgroundColor: '#F59E0B30' }]}>
+                  <Award size={16} color="#F59E0B" strokeWidth={2} />
+                </View>
+                <View style={styles.activityContent}>
+                  <Text style={styles.activityText}>Badge "Inspirateur" débloqué !</Text>
+                  <Text style={styles.activityTime}>Il y a 1 jour</Text>
+                </View>
               </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityText}>Votre segment a reçu 12 nouveaux likes</Text>
-                <Text style={styles.activityTime}>Il y a 5 heures</Text>
-              </View>
-            </View>
-            <View style={styles.activityItem}>
-              <View style={styles.activityIcon}>
-                <Award size={16} color="#F59E0B" strokeWidth={2} />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityText}>Badge "Inspirateur" débloqué !</Text>
-                <Text style={styles.activityTime}>Il y a 1 jour</Text>
-              </View>
-            </View>
+            </LinearGradient>
           </View>
         </View>
+
+        <View style={styles.bottomSpacer} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#0F0F0F',
   },
   header: {
+    height: 100,
+  },
+  headerGradient: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 16,
+  },
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#111827',
+    color: '#FFFFFF',
   },
   settingsButton: {
     padding: 4,
   },
   scrollView: {
     flex: 1,
+  },
+  profileSection: {
     padding: 20,
+    paddingBottom: 0,
   },
   profileCard: {
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  profileCardGradient: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
     padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
   },
   avatarContainer: {
     position: 'relative',
@@ -248,7 +325,6 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#EDE9FE',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -263,7 +339,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: '#0F0F0F',
   },
   levelText: {
     fontSize: 12,
@@ -277,12 +353,18 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  userTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#8B5CF6',
     marginBottom: 4,
   },
   userBio: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#9CA3AF',
     marginBottom: 16,
   },
   xpContainer: {
@@ -290,58 +372,60 @@ const styles = StyleSheet.create({
   },
   xpBar: {
     height: 8,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#374151',
     borderRadius: 4,
     overflow: 'hidden',
   },
   xpProgress: {
     height: '100%',
-    backgroundColor: '#8B5CF6',
   },
   xpText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#9CA3AF',
     fontWeight: '500',
   },
   statsContainer: {
     flexDirection: 'row',
     gap: 12,
+    paddingHorizontal: 20,
     marginBottom: 24,
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  statCardGradient: {
     padding: 16,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+  },
+  statIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   statNumber: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
-    marginTop: 8,
+    color: '#FFFFFF',
+    marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#9CA3AF',
     fontWeight: '500',
-    marginTop: 4,
   },
   section: {
+    paddingHorizontal: 20,
     marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
     marginBottom: 16,
   },
   badgesContainer: {
@@ -351,38 +435,29 @@ const styles = StyleSheet.create({
   },
   badgeCard: {
     width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
   lockedBadge: {
     opacity: 0.6,
+  },
+  badgeCardGradient: {
+    padding: 16,
+    alignItems: 'center',
+    minHeight: 140,
   },
   badgeIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#FEF3C7',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
   },
-  lockedBadgeIcon: {
-    backgroundColor: '#F3F4F6',
-  },
   badgeName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 4,
   },
@@ -391,34 +466,38 @@ const styles = StyleSheet.create({
   },
   badgeDescription: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#9CA3AF',
     textAlign: 'center',
+    marginBottom: 8,
+  },
+  rarityIndicator: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  rarityText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   activityContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  activityCardGradient: {
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
   },
   activityItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: '#374151',
   },
   activityIcon: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F9FAFB',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -428,12 +507,15 @@ const styles = StyleSheet.create({
   },
   activityText: {
     fontSize: 14,
-    color: '#111827',
+    color: '#FFFFFF',
     fontWeight: '500',
     marginBottom: 4,
   },
   activityTime: {
     fontSize: 12,
     color: '#9CA3AF',
+  },
+  bottomSpacer: {
+    height: 100,
   },
 });
